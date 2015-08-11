@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Math">
+      <UniqueIdentifier>{3d97b5bd-edfc-4af9-9e4d-54268933bcd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{5a1e4bd9-8b9c-41d9-b78d-28551eb9d029}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Cubes">
+      <UniqueIdentifier>{6127bafb-b7c8-4356-87ce-56590ca2c1d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cubes">
+      <UniqueIdentifier>{b334f0ae-a2c1-4463-8715-7a4af5b01e58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Cubes\Polymorphs">
+      <UniqueIdentifier>{3bc868fb-3db1-4860-ae47-dcc641dfbd4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenGL">
+      <UniqueIdentifier>{9c25d57a-7302-4561-b450-25b7984f823d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cubes\Polymorphs">
+      <UniqueIdentifier>{6c49e3d4-83bc-4bfb-802a-877fd2ae00d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL">
+      <UniqueIdentifier>{a79e53b0-5157-4c4e-9abf-9a50dbe5655d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenGL\UI">
+      <UniqueIdentifier>{19b0e302-184f-4d03-b8e1-d122632fe1f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL\UI">
+      <UniqueIdentifier>{7d836b0f-ccef-4df9-86d1-237df24a8ffd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\World">
+      <UniqueIdentifier>{44a154e2-0bca-4f54-b652-71ecfba1d362}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\World">
+      <UniqueIdentifier>{3eb40fe9-4df5-43c0-8b65-c09effbbef76}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix3.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix4.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="vector2.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="vector3.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="vector4.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeStack.cpp">
+      <Filter>Source Files\Cubes</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Source Files\Cubes</Filter>
+    </ClCompile>
+    <ClCompile Include="BlueCube.cpp">
+      <Filter>Source Files\Cubes\Polymorphs</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>Source Files\Cubes</Filter>
+    </ClCompile>
+    <ClCompile Include="RedCube.cpp">
+      <Filter>Source Files\Cubes\Polymorphs</Filter>
+    </ClCompile>
+    <ClCompile Include="vec4VBO.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL_Framebuffer.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="HomeCube.cpp">
+      <Filter>Source Files\Cubes\Polymorphs</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UIButton.cpp">
+      <Filter>Source Files\OpenGL\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIframe.cpp">
+      <Filter>Source Files\OpenGL\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UISlider.cpp">
+      <Filter>Source Files\OpenGL\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UITextBox.cpp">
+      <Filter>Source Files\OpenGL\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Source Files\OpenGL\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainGen.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldBuilder.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix3.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix4.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="vector2.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="vector3.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="vector4.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeStack.h">
+      <Filter>Header Files\Cubes</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Header Files\Cubes</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Header Files\Cubes</Filter>
+    </ClInclude>
+    <ClInclude Include="BlueCube.h">
+      <Filter>Header Files\Cubes\Polymorphs</Filter>
+    </ClInclude>
+    <ClInclude Include="RedCube.h">
+      <Filter>Header Files\Cubes\Polymorphs</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="vec4VBO.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL_Framebuffer.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="HomeCube.h">
+      <Filter>Header Files\Cubes\Polymorphs</Filter>
+    </ClInclude>
+    <ClInclude Include="GL_Loader.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIButton.h">
+      <Filter>Header Files\OpenGL\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIframe.h">
+      <Filter>Header Files\OpenGL\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UISlider.h">
+      <Filter>Header Files\OpenGL\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UITextBox.h">
+      <Filter>Header Files\OpenGL\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Header Files\OpenGL\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="customMath.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGen.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldBuilder.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
