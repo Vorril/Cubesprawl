@@ -73,8 +73,6 @@ public:
 	void draw()const;
 	//Set fbo before this
 	void drawToFBO()const;
-
-	vector<Chunk*> worldChunks;//TODO move this back to private //TODO make this a list so modification doesnt invalidate pointers!!!!! Or just iterate map when needbe
 private:
 //SINGLETON/////
 	World();
@@ -84,6 +82,8 @@ private:
 
 	//Data containers
 	map<int, Chunk*> chunkMap;
+	vector<Chunk*> worldChunks;//TODO move this back to private //TODO make this a list so modification doesnt invalidate pointers!!!!! Or just iterate map when needbe
+
 	int chunksWide = 1; int lowestX = 0; int highestX = 0;
 	int chunksTall = 1; int lowestY = 0; int highestY = 0;
 	int linearPosition(int x, int y)const;

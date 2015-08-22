@@ -229,7 +229,7 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 			break;
 		}
 		case 84:{//t
-			double t1 = glfwGetTime();
+			/*double t1 = glfwGetTime();
 			
 			for each (Chunk* chunk in world.worldChunks){
 				world.determineChunkExposed(chunk->chunkX, chunk->chunkY);
@@ -243,7 +243,7 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 				world.determineChunkExposedSides(chunk->chunkX, chunk->chunkY);
 				chunk->bufferAllVisibleSides();
 			}
-			cout << "Time Sided: " << (glfwGetTime() - t1) * 1000 << "ms" << endl;
+			cout << "Time Sided: " << (glfwGetTime() - t1) * 1000 << "ms" << endl;*/ 
 
 			
 

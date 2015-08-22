@@ -66,6 +66,8 @@ void World::addChunk(int chunkX, int chunkY, int height){
 	for each (Chunk* remakeMap in worldChunks){
 		chunkMap[linearPosition(remakeMap->chunkX, remakeMap->chunkY)] = remakeMap;
 	}
+
+	//TODO recheck nieghbors for exposed etc
 }
 
 
@@ -80,7 +82,7 @@ Cube** World::getCubePosition(int x, int y, int z)const{
 }
 
 Cube* World::getCube(int worldX, int y, int worldZ)const{
-	Chunk* focus = getChunkWorld(worldX, worldZ);
+	return getChunkWorld(worldX, worldZ)->getChunkCube(worldX & 15, y, worldZ & 15);
 }
 
 Chunk* World::getChunkWorld(int x,  int z)const{
@@ -288,6 +290,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (forw->exposedSides == 16){
 			getChunkWorld(x + 1, z)->reveal(forw);
 		}
+		else getChunkWorld(x + 1, z)->needsBuffered = true;
 	}//forw
 
 	if (Cube* back = occupied(x - 1, y, z)){//16 back
@@ -295,6 +298,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (back->exposedSides == 32){
 			getChunkWorld(x - 1, z)->reveal(back);
 		}
+		else getChunkWorld(x - 1, z)->needsBuffered = true;
 	}//back
 
 	if (Cube* right = occupied(x, y, z + 1)){// 8 right
@@ -302,6 +306,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (right->exposedSides == 4){
 			getChunkWorld(x, z + 1)->reveal(right);
 		}
+		else getChunkWorld(x, z + 1)->needsBuffered = true;
 	}//right
 
 	if (Cube* left = occupied(x, y, z - 1)){// 4 left
@@ -309,6 +314,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (left->exposedSides == 8){
 			getChunkWorld(x, z - 1)->reveal(left);
 		}
+		else getChunkWorld(x, z - 1)->needsBuffered = true;
 	}//left
 }
 
