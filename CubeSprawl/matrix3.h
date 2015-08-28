@@ -8,7 +8,7 @@ class matrix3
 {
 public:
 	matrix3();
-	~matrix3();
+	//~matrix3();
 
 	float matrix[9];
 

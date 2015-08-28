@@ -36,10 +36,10 @@ public:
 
 
 	//Buffer everything// legacy
-	void bufferAll();
+	__declspec(deprecated) void bufferAll();
 	//Buffer all cubes which were determined to have at least one exposed side
-	void bufferAllVisible();
-	//Buffer only exposed faces determined by world.determineExposedSides
+	__declspec(deprecated) void bufferAllVisible();
+	//(Re-)Buffer only exposed faces determined by world.determineExposedSides(on chunkGen) and kept up to date with sided methods thereafter
 	void bufferAllVisibleSides();
 
 
@@ -60,6 +60,7 @@ public:
 	//Bind the program first this binds buffers and calls pointers and draws
 	//Doesnt bind texture
 	void draw()const;
+	void drawNormMapped()const;
 	//Bind the program first this binds buffers and calls pointers and draws
 	void draw(Shader* texShader, GLuint tex)const;
 	void drawToFBO()const;

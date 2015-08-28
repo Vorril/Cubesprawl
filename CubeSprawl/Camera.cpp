@@ -65,7 +65,8 @@ void Camera::makeViewMatrix(vector3 lookAt, vector3 cameraPos){
 void Camera::remakeViewMatrix(){
 	//vector4 xAxis = vector4::UNIT_Y.cross(lookDirection);
 	//xAxis.normalize();
-	vector3 yAxis = lookDirection % perpToLookDir; // perptolook <=< xAxis
+	perpPerpDir = lookDirection % perpToLookDir; // perptolook <=< xAxis
+	vector3 & yAxis = perpPerpDir;
 
 	viewMatrix[0] = perpToLookDir.coords[0]; viewMatrix[1] = perpToLookDir.coords[1]; viewMatrix[2] = perpToLookDir.coords[2];
 	viewMatrix[4] = yAxis.coords[0]; viewMatrix[5] = yAxis.coords[1]; viewMatrix[6] = yAxis.coords[2];

@@ -20,10 +20,13 @@ void WorldBuilder::setCube(int x, int y, int z, CUBE type, bool evalVisiblityNow
 	{
 		case RED:
 			 *voxel = new RedCube();
-		break;
+			 break;
 		case BLUE:
-			 *voxel = new BlueCube();
-		break;
+			*voxel = new BlueCube();
+			break;
+		case HOME:
+			*voxel = new HomeCube();
+			break;
 		case EMPTY:
 		
 		default:
@@ -71,10 +74,10 @@ void WorldBuilder::setCube_ChunkSpace(Chunk* focus, int x, int y, int z, CUBE ty
 
 }
 
-void WorldBuilder::setChunksAsTerrain(int xCorner, int zCorner, int xWidth, int zDepth, float roughness){
+void WorldBuilder::setChunksAsTerrain(int xCorner, int zCorner, int xWidth, int zDepth, int high, float roughness){
 	for (int x = xCorner; x < (xCorner + xWidth); x++){
 		for (int z = zCorner; z < (zCorner + zDepth); z++){
-			worldFocus->addChunk(x, z);
+			worldFocus->addChunk(x, z, high);
 		}
 	}
 	int totWidth = 0;
@@ -95,7 +98,7 @@ void WorldBuilder::setChunksAsTerrain(int xCorner, int zCorner, int xWidth, int 
 
 	TerrainGen minimumSquare = TerrainGen(pow, 1.0f);
 	minimumSquare.generateChunk(0, 0);
-	minimumSquare.scaleAll(15.0f);
+	minimumSquare.scaleAll(high != -1 ? float(high-1) : 15.0f);//hahaha
 
 
 	for (int zWorld = zCorner * 16; zWorld < ((zCorner + zDepth) * 16); zWorld++){
@@ -121,7 +124,7 @@ void WorldBuilder::setChunksAsTerrain(int xCorner, int zCorner, int xWidth, int 
 		}
 	}
 
-	setBuffers();
+	updateBuffers();
 }
 
 void WorldBuilder::killCube(int x, int y, int z, bool evalNieghborsNow){
@@ -147,7 +150,7 @@ void WorldBuilder::killCube(int x, int y, int z, bool evalNieghborsNow){
 	}
 }
 
-void WorldBuilder::setBuffers(){
+void WorldBuilder::updateBuffers(){
 	worldFocus->bufferAllFlagged();
 }
 

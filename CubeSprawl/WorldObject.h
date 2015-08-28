@@ -8,12 +8,16 @@ class WorldObject
 public:
 static Shader* diffuseTexShader;
 static Shader* litTexShader;
+static Shader* litTexPVMShader;
+
+static matrix4 const* cameraPV;
 
 	WorldObject();
 	~WorldObject();
 
 	vec4VBO* mesh;
 	GLuint texture;
+	modelMat m_Matrix;
 
 	//TODO Library or load semantics
 	void loadMesh(const char* File);
@@ -23,5 +27,7 @@ static Shader* litTexShader;
 	void draw()const;
 
 	void drawLit()const;
+
+	void drawLitPVM()const;
 };
 

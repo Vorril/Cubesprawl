@@ -33,13 +33,14 @@ Shader flatCol;
 Shader pvFlatCol;
 Shader pvTexture;
 Shader pvArrTexture;
+Shader pvArrNormMap;
 //Shader pvColorFBO;
 Shader pvLitTex;
 Shader pvLitTexVary;
+Shader pvmLitTex;
 Shader hudText;
 /////////////////////////////////////////
 
-vec4VBO testNorms;
 
 //Chunk* testChunk[10];
 World& world = *(World::getInstance());//singleton
@@ -48,13 +49,17 @@ WorldBuilder testBuilder;
 UIframe* UI;
 
 WorldObject tower;
+WorldObject coordMarker;
 
 GLuint texArray;
+GLuint normMapArray;
 
 bool bound = false;
 bool paused = false;
 bool mousedown = false;
 bool lightControl = false;
+bool TAB_DOWN = false;
+bool shaderUsing = false;
 float speedMod = 0.29f;
 
 float tempf = 0.01f; float timef = 0.0f;
@@ -125,54 +130,45 @@ void display(){
 	worldCam.update();
 
 	//UI->mouseOver(window.mousePosGLcoords());
+	//UI->draw();
 	////////////////\
 	////////////////\\
 	////////////////\\\
 
-
-
-
-
-	///////////////////////////////
-	//if (viewBounds){
-	//	timef += times.deltaT;
-	//	if (timef > 10.0f) timef -= 10.0f;
-	//	light[0] = cosf(6.183f*timef / 10.0f);
-	//	light[2] = sinf(6.183f*timef / 10.0f);
-	//	Shader::updateUPO_light(light);
-	//}
-	//////////////////////////////
-
-
-	world.draw();
+	//////////////////////////////////////////////////////////////////////////////
+	testBuilder.updateBuffers();// Lookup how vsync in implemented maybe a better place for this
+	shaderUsing ? world.draw() : world.drawNormMapped();
 
 	glUseProgram(flatCol.theProgram);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, crosshair.VERT_BUFF_ID);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glDrawArrays(GL_LINES, 0, 4);
+	//////////////////////////////////////////////////////////////////////////////
 
-
-	//glUseProgram(pvFlatCol);
-	//glUniform3f(pvFlatCol.uniform1, 0.65f, 0.2f, 0.55f);
-	//glBindBuffer(GL_ARRAY_BUFFER, testNorms.VERT_BUFF_ID);
-	//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	//glDrawArrays(GL_TRIANGLES, 0, testNorms.size() );
-
+	
 
 
 	glUseProgram(0);
 
 
 	tower.drawLit();
+	/////////////////////
 
+	if (TAB_DOWN){
+		const vector3 coordMarkerLoc = worldCam.cameraPosition + (worldCam.lookDirection * -0.16f) + (worldCam.perpToLookDir * -0.107f) + (worldCam.perpPerpDir * 0.05f);
+		modelMat model;
+		model.translateModelTo(coordMarkerLoc);
+		model.scale( 0.02f );
+		coordMarker.m_Matrix = model;
 
-	//textBox->draw();
+		//WorldObject::cameraPV = worldCam.PV_Matrix;
 
-	//if (paused)
-		//UI->draw();//TODO unify draws based on transparency, depth buffer clears, etc
-
-
+		coordMarker.drawLitPVM();
+	
+	}
+	
+	/////////////////////////////////////////////////////////
 	glfwSwapBuffers(window.primaryWindow);
 }
 
@@ -194,6 +190,9 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 			if (paused) { glfwSetInputMode(window.primaryWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); }
 			else { glfwSetInputMode(window.primaryWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
 			paused = !paused;
+			break;
+		case 258://Tab
+			TAB_DOWN = true;
 			break;
 		case 65://a
 			worldCam.keyDownCode += 1;
@@ -224,26 +223,19 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 
 			double t1 = glfwGetTime();
 			world.clear();
-			testBuilder.setChunksAsTerrain(0, 0, 3, 3);
+			testBuilder.setChunksAsTerrain(0, 0, 3, 3, 32);
 			cout << "Time Make: " << (glfwGetTime() - t1) * 1000 << "ms" << endl;
 			break;
 		}
 		case 84:{//t
 			double t1 = glfwGetTime();
 			
+		
 			for each (Chunk* chunk in world.worldChunks){
-				world.determineChunkExposed(chunk->chunkX, chunk->chunkY);
-				chunk->bufferAllVisible();
-			}
-			cout << "Time All  : " << (glfwGetTime() - t1) * 1000 << "ms" << endl;
-
-
-			t1 = glfwGetTime();
-			for each (Chunk* chunk in world.worldChunks){
-				world.determineChunkExposedSides(chunk->chunkX, chunk->chunkY);
+				//world.determineChunkExposedSides(chunk->chunkX, chunk->chunkY);
 				chunk->bufferAllVisibleSides();
 			}
-			cout << "Time Sided: " << (glfwGetTime() - t1) * 1000 << "ms" << endl;
+			cout << "Time Buffer Exposed Sided: " << (glfwGetTime() - t1) * 1000 << "ms" << endl;
 
 			
 
@@ -265,9 +257,7 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 			toggle(lightControl);
 			break;
 		case 52:// 4
-			if (WorldObject::litTexShader == &pvLitTex)
-				WorldObject::litTexShader = &pvLitTexVary;
-			else WorldObject::litTexShader = &pvLitTex;
+			toggle(shaderUsing);
 			break;
 		case 53:// 5
 			break;
@@ -299,7 +289,9 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 	else if (action == 0){//release
 
 		switch (key){
-
+		case 258://Tab
+			TAB_DOWN = false;
+			break;
 		case 65://a
 			worldCam.keyDownCode -= 1;
 			break;
@@ -341,7 +333,7 @@ void mouse_button_callback(GLFWwindow* windowP, int button, int action, int mods
 				//cout << x << ", " << y << ", " << z << endl;
 				if (button == 1){
 					testBuilder.killCube(x, y, z, true);
-					testBuilder.setBuffers();
+					//testBuilder.updateBuffers();
 				}
 				
 				if (button == 0){
@@ -349,28 +341,28 @@ void mouse_button_callback(GLFWwindow* windowP, int button, int action, int mods
 					switch (code)
 					{
 					case TOP:
-						testBuilder.setCube(x, y + 1, z, RED, true);
+						testBuilder.setCube(x, y + 1, z, HOME, true);
 						break;
 					case BOT:
-						testBuilder.setCube(x, y - 1, z, RED, true);
+						testBuilder.setCube(x, y - 1, z, HOME, true);
 						break;
 					case LEFT:
-						testBuilder.setCube(x - 1, y, z, RED, true);
+						testBuilder.setCube(x - 1, y, z, HOME, true);
 						break;
 					case RIGHT:
-						testBuilder.setCube(x + 1, y, z, RED, true);
+						testBuilder.setCube(x + 1, y, z, HOME, true);
 						break;
 					case FORW:
-						testBuilder.setCube(x, y, z + 1, RED, true);
+						testBuilder.setCube(x, y, z + 1, HOME, true);
 						break;
 					case BACK:
-						testBuilder.setCube(x, y, z - 1, RED, true);
+						testBuilder.setCube(x, y, z - 1, HOME, true);
 						break;
 					default:
 						break;
 					}
 
-					testBuilder.setBuffers();
+					//testBuilder.updateBuffers();
 					
 				}
 
@@ -407,7 +399,7 @@ void mouse_button_callback(GLFWwindow* windowP, int button, int action, int mods
 				//cout << x << ", " << y << ", " << z << endl;
 				if (button == 1){
 					testBuilder.killCube(x, y, z);
-					testBuilder.setBuffers();
+					//testBuilder.updateBuffers();
 				}
 
 			}
@@ -515,17 +507,22 @@ void initialize(){
 	/////////////////////////////////////////////////////////
 	///////// Create Shaders ////////////////////////////////
 	pvLitTex.InitializeProgram("Shaders/pvLitTex.vert", "Shaders/pvLitTex.frag");
+	pvmLitTex.InitializeProgram("Shaders/pvmLitTex.vert", "Shaders/pvmLitTex.frag");
 	pvLitTexVary.InitializeProgram("Shaders/pvLitTexVary.vert", "Shaders/pvLitTexVary.frag");
 	pvTexture.InitializeProgram("Shaders/pvTexture.vert", "Shaders/pvTexture.frag"); 
 	flatCol.InitializeProgram("Shaders/flatColor.vert", "Shaders/flatColor.frag");
 	pvFlatCol.InitializeProgram("Shaders/pvFlatColor.vert", "Shaders/pvFlatColor.frag");
 	pvArrTexture.InitializeProgram("Shaders/pvArrTexture.vert", "Shaders/pvArrTexture.frag");
+	pvArrNormMap.InitializeProgram("Shaders/pvArrMapped.vert", "Shaders/pvArrMapped.frag");
 	//pvColorFBO.InitializeProgram("Shaders/pvColorFBO.vert", "Shaders/pvColorFBO.frag");
 
-	pvArrTexture.setSampler("arrSampler", Shader::SAMPLER_SETTING::ANISTROPIC, 16);
-	pvLitTex.setSampler("diffuseSampler", Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-	pvLitTexVary.setSampler("diffuseSampler", Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-	pvTexture.setSampler("diffuseSampler", Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+	pvArrTexture.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
+	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
+	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
+	pvLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+	pvmLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+	pvLitTexVary.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+	pvTexture.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
 
 
 	flatCol.setUniform("color", 1);
@@ -544,11 +541,16 @@ void initialize(){
 	glUniform1f(pvLitTexVary.uniform2, diffuse);
 	glUseProgram(0);
 
+	pvmLitTex.setUniform("pvm", 1);
+
 	Shader::setGlobalPV_UBO(&pvLitTex);
 	pvTexture.linkUBO();
 	pvFlatCol.linkUBO();
 	pvArrTexture.linkUBO();
 	pvLitTexVary.linkUBO();
+	pvmLitTex.linkUBO();
+	pvArrNormMap.linkUBO();
+	////////////////////////////////////////////////////////////////////
 
 	// Light
 	vector3 lightProperties(-1.0f, -0.4f, 1.0f);
@@ -578,17 +580,26 @@ void initialize(){
 	////World////////////////////
 	
 	vector<string> files;
-	files.push_back("Textures/HomeCube/home");
-	//files.push_back("Textures/RedCube/red");
-	files.push_back("Textures/red2");
-	files.push_back("Textures/BlueCube/blue");
+	//files.push_back("Textures/HomeCube/home");
+	////files.push_back("Textures/RedCube/red");
+	//files.push_back("Textures/red2");
+	////files.push_back("Textures/uv_test");
+	//files.push_back("Textures/BlueCube/blue");
 
-	GL_Loader::loadArrayTexture(texArray, 64, 64, 4, files,true);
+	//GL_Loader::loadArrayTexture(texArray, 64, 64, 4, files,true);
+
+	vector<string> mappedFiles;
+	mappedFiles.push_back("Textures/Mapped/paper");
+	mappedFiles.push_back("Textures/Mapped/grass");
+	mappedFiles.push_back("Textures/Mapped/rock");
+	GL_Loader::loadArrayTextureNormalMapped(texArray, normMapArray, 512, 512, mappedFiles);
 
 	////////////////////////////////////////////////////////////////
 	world.shader = &pvArrTexture;
 	world.texArray = texArray;
 	testBuilder.worldFocus = &world;
+	world.normmapshader = &pvArrNormMap;
+	world.texArray_NormMaps = normMapArray;
 
 	////////////////////////////////////////////////////////////////
 
@@ -624,22 +635,25 @@ void initialize(){
 	tower.loadMesh("Assets/tower.mesh");
 	tower.loadTexture("Textures/tower.bmp");
 
-	int max = world.getHeight(24, 24);
+	int max = world.getHeight(4, 8);
 	for (int y = 0; y < max; y++){
-		if ((*(world.getCubePosition(24, y, 24))) == nullptr){
-			tower.mesh->translate(24, y, 24);
+		if ((*(world.getCubePosition(4, y, 8))) == nullptr){
+			tower.mesh->translate(4.0f, y, 8.0f);
 			y += 32;
 		}
 	}
 
-	for (int i = 0; i < tower.mesh->verticies.size(); i++){
-		//testNorms.add(tower.mesh->verticies[i]);
-		testNorms.add(tower.mesh->verticies[i] + (tower.mesh->normals[i]*0.01f));
-	}
-	testNorms.genVertBuffer();
 
+	coordMarker.loadMesh("Assets/coordMarker.mesh");
+	coordMarker.loadTexture("Textures/coordMarker.bmp");
+
+	///WorldObject init// TODO make this right///////////
 	WorldObject::diffuseTexShader = &pvTexture;
 	WorldObject::litTexShader = &pvLitTex;
+	WorldObject::litTexPVMShader = &pvmLitTex;
+
+	WorldObject::cameraPV = &worldCam.PV_Matrix;
+	/////////////////////////////////////////////////////
 
 
 }
@@ -653,6 +667,7 @@ void exit(){
 	delete &world;
 	glDeleteShader(pvArrTexture.theProgram);
 	glDeleteShader(pvLitTex.theProgram);
+	glDeleteShader(pvmLitTex.theProgram);
 	glDeleteShader(flatCol.theProgram);
 	glDeleteShader(pvTexture.theProgram);
 	//glDeleteShader(pvColorFBO.theProgram);

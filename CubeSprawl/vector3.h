@@ -11,7 +11,7 @@ public:
 	vector3();
 	vector3(float x, float y, float z);
 	vector3(float x, float y);
-	~vector3();
+	//~vector3();
 
 	float coords[3];
 

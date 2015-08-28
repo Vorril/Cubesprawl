@@ -30,8 +30,7 @@ public:
 	bool initialized = false;//for static shaders
 
 	enum SAMPLER_SETTING{NONE, ANISTROPIC, TRILIN, BILIN, NEAR, NEAR_MIP};
-	GLuint sampler1; GLuint samplerIndex1;// for texture programs
-	GLuint sampler2; GLuint samplerIndex2;
+	GLuint samplers[3]; GLuint samplerIndexes[3];// for texture programs
 
 	GLuint uniform1; //generic use uniform set it on shader setup so as to not worry about the string name anymore than necc
 	GLuint uniform2;
@@ -196,28 +195,29 @@ public:
 	}
 
 	//level: Use 11 for bilin or trilin etc// level = number mips expected or xAniso
-	void setSampler(const char* samplerID, SAMPLER_SETTING setting, int level, GLuint mode = GL_REPEAT){
+	//Sampler index starts with 0
+	void setSampler(const char* fragShaderName, int samplerIndex,  SAMPLER_SETTING setting, int level, GLuint mode = GL_REPEAT){
 		//TODO use a pointer to work on multiple samplers
 
 		glUseProgram(theProgram);
-		samplerIndex1 = glGetUniformLocation(theProgram, samplerID);
-		glGenSamplers(1, &sampler1);
-		glUniform1i(samplerIndex1, 0);
+		samplerIndexes[samplerIndex] = glGetUniformLocation(theProgram, fragShaderName);
+		glGenSamplers(1, &samplers[samplerIndex]);
+		glUniform1i(samplerIndexes[samplerIndex], samplerIndex);// same number for glActiveTexture( GL_TEXTURE0 ), GL_TEXTURE2 etc
 
 		switch (setting)
 		{
 		case Shader::ANISTROPIC:{
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glSamplerParameterf(sampler1, GL_TEXTURE_MAX_ANISOTROPY_EXT, (float)level);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glSamplerParameterf(samplerIndexes[samplerIndex], GL_TEXTURE_MAX_ANISOTROPY_EXT, (float)level);
 		}
 			break;
 		case Shader::TRILIN:{
-			glSamplerParameteri(sampler1, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameteri(sampler1, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_S, mode);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_T, mode);
-			glSamplerParameteri(sampler1, GL_TEXTURE_MAX_LEVEL, level);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_S, mode);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_T, mode);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MAX_LEVEL, level);
 		}
 			break;
 		case Shader::BILIN:{
@@ -225,19 +225,19 @@ public:
 		}
 			break;
 		case Shader::NEAR:{
-			glSamplerParameteri(sampler1, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glSamplerParameteri(sampler1, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_S, mode);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_T, mode);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_S, mode);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_T, mode);
 			//glSamplerParameteri(sampler1, GL_TEXTURE_MAX_LEVEL, level);
 		}
 			  break; 
 		case Shader::NEAR_MIP:{
-			glSamplerParameteri(sampler1, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glSamplerParameteri(sampler1, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_S, mode);
-			glSamplerParameteri(sampler1, GL_TEXTURE_WRAP_T, mode);
-			glSamplerParameteri(sampler1, GL_TEXTURE_MAX_LEVEL, level);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_S, mode);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_WRAP_T, mode);
+			glSamplerParameteri(samplerIndexes[samplerIndex], GL_TEXTURE_MAX_LEVEL, level);
 		}
 			break;
 		case NONE:{

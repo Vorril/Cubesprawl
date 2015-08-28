@@ -28,13 +28,10 @@ vector4::vector4(vector3 dir, float wVal){
 
 }
 
-vector4::~vector4()
-{
-}
+//vector4::~vector4()
+//{
+//}
 
-const vector4 vector4::UNIT_X = vector4(1.00f, 0.0f, 0.0f);
-const vector4 vector4::UNIT_Y = vector4(0.0f, 1.00f, 0.0f);
-const vector4 vector4::UNIT_Z = vector4(0.0f, 0.0f, 1.00f);
 
 //does not include w in normalization
 void vector4::normalize(){

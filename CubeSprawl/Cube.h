@@ -4,7 +4,7 @@
 typedef unsigned int uint;
 typedef std::pair<int, int> coordi;
 
-enum CUBE{EMPTY, RED, BLUE, HOME };
+enum CUBE{HOME, RED, BLUE, EMPTY};
 enum CUBE_SIDE{TOP, BOT, LEFT, RIGHT, FORW, BACK};
 
 class Cube

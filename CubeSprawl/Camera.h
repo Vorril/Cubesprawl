@@ -14,10 +14,11 @@ private:
 	//bool needsUpdated;considering
 
 public: //really need to move these to private, /use get methods// actually try to pass the camera when possible
-	//matrix4 PVmatrix; //for now going with on gpu combinations for flexibility
+	//matrix4 PVmatrix; 
 	matrix4 PV_Matrix;
 	vector3 lookDirection;
 	vector3 perpToLookDir;
+	vector3 perpPerpDir;
 	vector3 cameraPosition;//worldspace
 
 	unsigned int keyDownCode = 0;

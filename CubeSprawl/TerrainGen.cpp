@@ -374,14 +374,17 @@ void TerrainGen::genIndivNormals(){
 #endif
 
 	//ignore the edges for now 
-	for (int x = 0; x < size; x++){
-		surfaceMesh.normals[((0)*size + x)] = vector3(0.0f, 1.0f, 0.0f);
-		surfaceMesh.normals[((size-1)*size + x)] = vector3(0.0f, 1.0f, 0.0f);
-	}
-	for (int y = 0; y < size; y++){
-		surfaceMesh.normals[((y)*size + 0)] = vector3(0.0f, 1.0f, 0.0f);
-		surfaceMesh.normals[((y)*size + size - 1)] = vector3(0.0f, 1.0f, 0.0f);
-	}
+
+	// Not using in this project// Moreover need to reqrite this using world coord semantics like ive done here
+
+	//for (int x = 0; x < size; x++){
+	//	surfaceMesh.normals[((0)*size + x)] = vector3(0.0f, 1.0f, 0.0f);
+	//	surfaceMesh.normals[((size-1)*size + x)] = vector3(0.0f, 1.0f, 0.0f);
+	//}
+	//for (int y = 0; y < size; y++){
+	//	surfaceMesh.normals[((y)*size + 0)] = vector3(0.0f, 1.0f, 0.0f);
+	//	surfaceMesh.normals[((y)*size + size - 1)] = vector3(0.0f, 1.0f, 0.0f);
+	//}
 
 	//inner
 	for (int x = 1; x < size - 1; x++){
@@ -488,7 +491,7 @@ void TerrainGen::genIndivNormals(){
 
 			//accumulate *= -1.0f;
 			accumulate.normalize();
-			surfaceMesh.normals[((y)*size + x)] = accumulate;
+			//surfaceMesh.normals[((y)*size + x)] = accumulate;
 
 #ifdef DEBUG_ADDITIONAL
 			debugNormLines.verticies[((y)*size + x) * 2] = vector3(x*separation + chunkCoords.first*width, coord(x, y), y * separation + chunkCoords.second*width);
@@ -501,11 +504,11 @@ void TerrainGen::genIndivNormals(){
 
 	vector<float> guassKern;
 	myMath::getGuassKern(&guassKern, 1);
-	myMath::convolveVectorSqSepKern(&surfaceMesh.normals, size, guassKern, guassKern);
-	for each (vector3 norm in surfaceMesh.normals)
-	{
-		norm.normalize();
-	}
+	//myMath::convolveVectorSqSepKern(&surfaceMesh.normals, size, guassKern, guassKern);
+	//for each (vector3 norm in surfaceMesh.normals)
+	//{
+	//	norm.normalize();
+	//}
 
 
 

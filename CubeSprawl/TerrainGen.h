@@ -47,6 +47,7 @@ public:
 	int indexSize;
 	void makeIndices();
 
+	//Scale all to be at most this high
 	void scaleAll(float maxSet);
 	float getHeight(int x, int y);
 

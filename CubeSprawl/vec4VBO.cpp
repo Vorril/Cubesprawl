@@ -91,22 +91,22 @@ void vec4VBO::refreshVertBuffer(){
 void vec4VBO::genNormBuffer(unsigned int hint){
 	glGenBuffers(1, &NORM_BUFF_ID);
 	glBindBuffer(GL_ARRAY_BUFFER, NORM_BUFF_ID);
-	glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float) * normals.size(),
+	glBufferData(GL_ARRAY_BUFFER,  sizeof(float) * normals.size(),
 		normals.data(),
 		hint);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void vec4VBO::refreshNormData(){
+void vec4VBO::refreshNormBuffer(){
 	glBindBuffer(GL_ARRAY_BUFFER, NORM_BUFF_ID);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, 3 * sizeof(float)* normals.size(),
+	glBufferSubData(GL_ARRAY_BUFFER, 0,  sizeof(float)* normals.size(),
 		normals.data());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void vec4VBO::regenNormBuffer(){
 	glBindBuffer(GL_ARRAY_BUFFER, NORM_BUFF_ID);
-	glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float)* normals.size(),
+	glBufferData(GL_ARRAY_BUFFER,  sizeof(float)* normals.size(),
 		normals.data(),
 		GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -230,6 +230,19 @@ void vec4VBO::addUV(float rAdd, float sAdd){
 void vec4VBO::addUVW(float u, float v, float w){
 	texCoords_3D.push_back(vector3(u, v, w));
 }
+
+void vec4VBO::addNorm(vector3 normal){
+	addNorm(normal[0], normal[1], normal[2]);
+}
+
+void vec4VBO::addNorm(float x, float y, float z){
+	normals.push_back(x);
+	normals.push_back(y);
+	normals.push_back(z);
+}
+
+
+
 
 vector4 &vec4VBO::operator[](int i){
 	return this->verticies[i];

@@ -28,7 +28,7 @@ class vec4VBO
 public:
 	//Members/////////////////////////////////////////////////////
 	vector<vector4> verticies;
-	vector<vector3> normals;
+	vector<float> normals;//stands out not being a vec3...
 	vector<vector2> texCoords;
 	vector<vector3> texCoords_3D;
 
@@ -63,7 +63,7 @@ public:
 	//Generate for the first time
 	void genNormBuffer(unsigned int hint = GL_STATIC_DRAW);
 	//Regen after a resize
-	void refreshNormData();
+	void refreshNormBuffer();
 	//Update after change of data (but not resize)
 	void regenNormBuffer();
 	void regenUVBuffer();
@@ -82,10 +82,17 @@ public:
 	void add(vector4 vecAdd);
 	void add(vector3 vecAdd);
 
+
 	void addUV(float rAdd, float sAdd);
 
 	void addUVW(float uAdd, float vAdd, float wAdd);
 	
+
+	void addNorm(vector3 normal);
+	void addNorm(float x, float y, float z);
+
+
+
 	//For use with small non pvm meshes for static movement
 	void translate(float xAdd, float yAdd, float zAdd);
 

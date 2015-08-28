@@ -7,9 +7,12 @@
 class vector4 //a 4vector class basically
 {
 public:
-	static const vector4 UNIT_X;
-	static const vector4 UNIT_Y;
-	static const vector4 UNIT_Z;
+
+	vector4(float xCoord, float yCoord, float zCoord, float wVal = 1.0f);
+	vector4(vector3 dir, float wVal = 1.0f);
+	vector4();
+
+	//~vector4();
 
 	float coords[4];
 
@@ -42,12 +45,6 @@ public:
 	operator const vector3(){
 		return vector3(coords[0], coords[1], coords[2]);
 	}
-
-	vector4(float xCoord, float yCoord, float zCoord, float wVal = 1.0f);
-	vector4(vector3 dir, float wVal = 1.0f);
-	vector4();
-
-	~vector4();
 
 	
 

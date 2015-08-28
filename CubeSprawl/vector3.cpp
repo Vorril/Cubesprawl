@@ -25,9 +25,9 @@ vector3::vector3(float xP, float yP){
 }
 
 
-vector3::~vector3()
-{
-}
+//vector3::~vector3()
+//{
+//}
 
 float vector3::fastInvSqrt(float number)
 {

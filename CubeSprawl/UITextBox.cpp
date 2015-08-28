@@ -46,18 +46,18 @@ void UITextBox::initializeShader(TEXTBOX_TYPES type){
 	case UITextBox::HUD:
 		UITextBox::HUDTextShader.initialized = true;
 		UITextBox::HUDTextShader.InitializeProgram("Shaders/Text/hudTextShader.vert", "Shaders/Text/hudTextShader.frag");
-		UITextBox::HUDTextShader.samplerIndex1 = glGetUniformLocation(UITextBox::HUDTextShader.theProgram, "textHudSampler");
-		glGenSamplers(1, &UITextBox::HUDTextShader.sampler1);
-		glSamplerParameteri(UITextBox::HUDTextShader.sampler1, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glSamplerParameteri(UITextBox::HUDTextShader.sampler1, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		UITextBox::HUDTextShader.samplerIndexes[0] = glGetUniformLocation(UITextBox::HUDTextShader.theProgram, "textHudSampler");
+		glGenSamplers(1, &UITextBox::HUDTextShader.samplers[0]);
+		glSamplerParameteri(UITextBox::HUDTextShader.samplers[0], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glSamplerParameteri(UITextBox::HUDTextShader.samplers[0], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		break;
 	case UITextBox::WORLD:
 		UITextBox::pvTextShader.initialized = true;
 		UITextBox::pvTextShader.InitializeProgram("Shaders/Text/pvTextShader.vert", "Shaders/Text/pvTextShader.frag");
-		UITextBox::pvTextShader.samplerIndex1 = glGetUniformLocation(UITextBox::pvTextShader.theProgram, "textSampler");
-		glGenSamplers(1, &UITextBox::pvTextShader.sampler1);
-		glSamplerParameteri(UITextBox::pvTextShader.sampler1, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glSamplerParameteri(UITextBox::pvTextShader.sampler1, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		UITextBox::pvTextShader.samplerIndexes[0] = glGetUniformLocation(UITextBox::pvTextShader.theProgram, "textSampler");
+		glGenSamplers(1, &UITextBox::pvTextShader.samplers[0]);
+		glSamplerParameteri(UITextBox::pvTextShader.samplers[0], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glSamplerParameteri(UITextBox::pvTextShader.samplers[0], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		pvTextShader.linkUBO();
 		break;
 	case UITextBox::BILLBOARD:
@@ -119,10 +119,10 @@ void UITextBox::draw(){
 	glEnableVertexAttribArray(0); // position
 	glEnableVertexAttribArray(1); // uv tex coords
 
-	glUniform1i(shaderToUse->samplerIndex1, 0);
+	glUniform1i(shaderToUse->samplerIndexes[0], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, font->texture);
-	glBindSampler(0, shaderToUse->sampler1);
+	glBindSampler(0, shaderToUse->samplers[0]);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, dataBuffers.VERT_BUFF_ID);

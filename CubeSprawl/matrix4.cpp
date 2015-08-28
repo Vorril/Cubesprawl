@@ -6,9 +6,9 @@ matrix4::matrix4() :matrix()// ":matrix()" zeroes it
 }
 
 
-matrix4::~matrix4()
-{
-}
+//matrix4::~matrix4()
+//{
+//}
 
 // 0  1  2  3		X:  1    0    0    -
 // 4  5  6  7			0   cos -sin   -
@@ -95,7 +95,7 @@ vector4 matrix4::rotateByArb_XZ(vector4 pointToRot, vector4 axisNormal, float th
 
 //useful to make VP or MVP matrixes to pass
 //ROW MAJOR
-matrix4 matrix4::operator*(const matrix4& dot){
+matrix4 matrix4::operator*(const matrix4& dot)const{
 	matrix4 multi;            //dot
 						// |a  b  c  d| 
 						// |e  f  g  h| 
@@ -229,4 +229,39 @@ matrix4::operator matrix3()const{
 	topLeft[8] = matrix[10];
 
 	return topLeft;
+}
+
+
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ///////////// Model Matrix ///////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+modelMat::modelMat() :matrix4(){
+
+}
+
+modelMat::~modelMat(){
+
+}
+
+//Translate a moodel matrix BY translation vector
+void modelMat::translateModel(const vector3 translate){
+	matrix[3] += translate[0];
+	matrix[7] += translate[1];
+	matrix[11] += translate[2];
+
+}
+
+//Translate a model matrix to an absolute position
+void modelMat::translateModelTo(const vector3 translate){
+	matrix[3] = translate[0];
+	matrix[7] = translate[1];
+	matrix[11] = translate[2];
+
+}
+
+void modelMat::scale(float scaleBy){
+	matrix[0] = matrix[5] = matrix[10] = scaleBy;
 }

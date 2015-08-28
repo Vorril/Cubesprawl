@@ -11,9 +11,9 @@ matrix3::matrix3() :matrix()// ":matrix()" zeroes it
 }														// 0 0 1   // 6 7 8
 
 
-matrix3::~matrix3()
-{
-}
+//matrix3::~matrix3()
+//{
+//}
 
 //X:	1    0    0    		 Y:  cos   0   sin   		 z:  cos  -sin   0    
 // 		0   cos -sin   			  0    1    0    		     sin   cos   0    

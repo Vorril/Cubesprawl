@@ -10,8 +10,10 @@ public:
 	~World();
 	void clear();
 	static World* getInstance();
-	Shader* shader;
+	Shader* shader; //TODO temp two of these is redundant
+	Shader* normmapshader;
 	GLuint texArray;
+	GLuint texArray_NormMaps;
 
 	void addChunk(int chuX, int chuY, int height = -1);
 
@@ -45,7 +47,7 @@ public:
 	//After killing a cube nieghbors may become visible
 	void evaluateNeighborsRevealed(int x, int y, int z);
 	//sets a cube exposed given world coords
-	void setExposed(int x, int y, int z, bool checkFirst = false);
+	__declspec(deprecated) void setExposed(int x, int y, int z, bool checkFirst = false);
 	//Sided set exposed
 	void setExposedSide(int x, int y, int z, int side);
 	//Chunk coords
@@ -71,6 +73,8 @@ public:
 	Cube* clickTestSide(vector3 camPos, vector3 lookDir, int& sideHit)const;
 
 	void draw()const;
+
+	void drawNormMapped()const;
 	//Set fbo before this
 	void drawToFBO()const;
 

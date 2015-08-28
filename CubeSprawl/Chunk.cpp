@@ -17,7 +17,7 @@ Chunk::Chunk(int height)
 
 	buffer.genVertBuffer();
 	buffer.genUVWBuffer();
-	buffer.genIndexBuffer();
+	buffer.genNormBuffer();
 }
 
 Chunk::~Chunk()
@@ -289,6 +289,36 @@ void Chunk::bufferAllVisible(){
 }
 
 void Chunk::bufferAllVisibleSides(){
+	// T % B = N
+	const float topNorms[54] = { 
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // T (+z)// B (+x)// N (+y)
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f	 };
+	const float botNorms[54] = {
+		1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, // T (+x)// B (+z)// N (-y)
+		1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f	};
+
+	const float leftNorms[54] = { 
+		0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, // T (+y)// B (+x)// N (-z)
+		0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f	};
+	const float rightNorms[54] = { 
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,// T (+x)// B (+y)// N (+z)
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f	};
+
+	const float frontNorms[54] = {
+		0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,// T (+y)// B (+z)// N (+x)
+		0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f	};
+	const float backNorms[54] = {
+		0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,// T (+z)// B (+y)// N (-x)
+		0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f  };
+
+
+
 	buffer.clear();
 
 	list<Cube*>::iterator iter;
@@ -324,9 +354,7 @@ void Chunk::bufferAllVisibleSides(){
 			buffer.addUVW(baseX + UVunit, baseY + UVunit, type);//TR
 			buffer.addUVW(baseX + UVunit, baseY, type);//BR
 
-			/*for (int i = 0; i < 6; i++){
-				buffer.index.push_back(type);
-			}*/
+			buffer.normals.insert(buffer.normals.end(), &topNorms[0], &topNorms[0] + 54);
 		}
 
 		// Bot ////
@@ -345,24 +373,26 @@ void Chunk::bufferAllVisibleSides(){
 			buffer.addUVW(baseX + UVunit, baseY, type);//BR
 			buffer.addUVW(baseX + UVunit, baseY + UVunit, type);//TR
 
+			buffer.normals.insert(buffer.normals.end(), &botNorms[0], &botNorms[0] + 54);
 		}
 
 		// Left ////
 		if (code & 4){
-			buffer.add(xf + 1.0f, yf + 1.0f, zf);//TL
-			buffer.add(xf + 1.0f, yf, zf); //BL
-			buffer.add(xf, yf, zf); //BR
-			buffer.add(xf + 1.0f, yf + 1.0f, zf);//TL
-			buffer.add(xf, yf, zf);//BR
-			buffer.add(xf, yf + 1.0f, zf);//TR
+			buffer.add(xf, yf + 1.0f, zf);//TL
+			buffer.add(xf + 1.0f, yf, zf); //BR
+			buffer.add(xf, yf, zf);//BL
+			buffer.add(xf + 1.0f, yf + 1.0f, zf);//TR
+			buffer.add(xf + 1.0f, yf, zf); //BR
+			buffer.add(xf, yf + 1.0f, zf);//TL
 
 			buffer.addUVW(baseX, baseY + UVunit, type);//TL
+			buffer.addUVW(baseX + UVunit, baseY, type);//BR
 			buffer.addUVW(baseX, baseY, type);//BL
+			buffer.addUVW(baseX + UVunit, baseY + UVunit, type);//TR
 			buffer.addUVW(baseX + UVunit, baseY, type);//BR
 			buffer.addUVW(baseX, baseY + UVunit, type);//TL
-			buffer.addUVW(baseX + UVunit, baseY, type);//BR
-			buffer.addUVW(baseX + UVunit, baseY + UVunit, type);//TR
 
+			buffer.normals.insert(buffer.normals.end(), &leftNorms[0], &leftNorms[0] + 54);
 		}
 
 		// Right ////
@@ -381,7 +411,7 @@ void Chunk::bufferAllVisibleSides(){
 			buffer.addUVW(baseX + UVunit, baseY + UVunit, type);//TR
 			buffer.addUVW(baseX + UVunit, baseY, type);//BR
 
-			
+			buffer.normals.insert(buffer.normals.end(), &rightNorms[0], &rightNorms[0] + 54);
 		}
 
 		// Back ////
@@ -400,7 +430,7 @@ void Chunk::bufferAllVisibleSides(){
 			buffer.addUVW(baseX, baseY + 1.0f, type);//TL
 			buffer.addUVW(baseX + 1.0f, baseY + 1.0f, type);//TR
 
-			
+			buffer.normals.insert(buffer.normals.end(), &backNorms[0], &backNorms[0] + 54);
 		}
 
 		// Forward ////
@@ -419,7 +449,7 @@ void Chunk::bufferAllVisibleSides(){
 			buffer.addUVW(baseX + 1.0f, baseY + 1.0f, type);//TR
 			buffer.addUVW(baseX + 1.0f, baseY, type);//BR
 
-			
+			buffer.normals.insert(buffer.normals.end(), &frontNorms[0], &frontNorms[0] + 54);
 		}
 
 	}//iterate loop
@@ -427,6 +457,7 @@ void Chunk::bufferAllVisibleSides(){
 
 	buffer.regenVertBuffer();
 	buffer.regenUVWBuffer();
+	buffer.regenNormBuffer();
 
 	needsBuffered = false;
 }
@@ -478,6 +509,34 @@ void Chunk::draw()const{
 
 	glDrawArrays(GL_TRIANGLES, 0, buffer.verticies.size());
 
+}
+
+void Chunk::drawNormMapped()const{
+	//(0); // position
+	//(1); // uv tex coords
+	//(2); // array
+	//(3); // tangent
+	//(4); // bittangent
+	//(5); // norm
+
+	glBindBuffer(GL_ARRAY_BUFFER, buffer.VERT_BUFF_ID);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, buffer.UVW_BUFF_ID);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)(sizeof(float) * 2));
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, buffer.NORM_BUFF_ID);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)0);
+
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)(sizeof(float) * 3));
+
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)(sizeof(float) * 6));
+
+	glDrawArrays(GL_TRIANGLES, 0, buffer.verticies.size());
 }
 
 void Chunk::draw(Shader* texShader, GLuint tex)const{

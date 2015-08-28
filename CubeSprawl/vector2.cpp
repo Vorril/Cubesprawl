@@ -12,6 +12,6 @@ vector2::vector2(float u, float v)
 	coords[1] = v;
 }
 
-vector2::~vector2()
-{
-}
+//vector2::~vector2()
+//{
+//}

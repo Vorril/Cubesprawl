@@ -80,7 +80,8 @@ Cube** World::getCubePosition(int x, int y, int z)const{
 }
 
 Cube* World::getCube(int worldX, int y, int worldZ)const{
-	Chunk* focus = getChunkWorld(worldX, worldZ);
+	return getChunkWorld(worldX, worldZ)->getChunkCube(worldX & 15, y, worldZ & 15);
+	
 }
 
 Chunk* World::getChunkWorld(int x,  int z)const{
@@ -141,7 +142,7 @@ int World::getHeight(int x, int z){
 
 
 
-__declspec(deprecated) void World::setExposed(int x, int y, int z, bool checkFirst){
+void World::setExposed(int x, int y, int z, bool checkFirst){
 	Cube** focus = getCubePosition(x, y, z);
 	if (focus == nullptr || *focus == nullptr || (*focus)->isExposed){//carefully remembering not to expose something already exposed...
 		return;//
@@ -712,7 +713,7 @@ void World::draw()const{
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray);
-	glBindSampler(0, shader->sampler1);
+	glBindSampler(0, shader->samplers[0]);
 	
 
 	for each (Chunk* chunkPtr in worldChunks){
@@ -724,6 +725,40 @@ void World::draw()const{
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+
+	glUseProgram(0);
+}
+
+void World::drawNormMapped()const{
+	glUseProgram(normmapshader->theProgram);
+
+	glEnableVertexAttribArray(0); // position
+	glEnableVertexAttribArray(1); // uv tex coords
+	glEnableVertexAttribArray(2); // array
+	glEnableVertexAttribArray(3); // tangent
+	glEnableVertexAttribArray(4); // bittangent
+	glEnableVertexAttribArray(5); // norm
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray);
+	glBindSampler(0, shader->samplers[0]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray_NormMaps);
+	glBindSampler(1, shader->samplers[1]);
+
+
+	for each (Chunk* chunkPtr in worldChunks){
+
+		chunkPtr->drawNormMapped();
+
+	}
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
+	glDisableVertexAttribArray(4);
+	glDisableVertexAttribArray(5);
 
 	glUseProgram(0);
 }

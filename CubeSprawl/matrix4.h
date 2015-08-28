@@ -18,7 +18,7 @@ public:
 	matrix4();
 	//matrix4(matrix4& copy);
 
-	~matrix4();
+	//~matrix4();
 
 	//Takes degrees
 	static matrix4 makeRotateXaxis(float theta);
@@ -32,7 +32,7 @@ public:
 
 	matrix4  transpose()const;
 
-	matrix4 operator*(const matrix4& dot);
+	matrix4 operator*(const matrix4& dot)const;
 	vector4 operator*(const vector4& dot);
 	vector4 rotMult(vector4 const dot)const;
 
@@ -40,6 +40,9 @@ public:
 	float & operator[](int i){ return matrix[i]; }
 	operator matrix3()const;
 
+	
+
+#ifdef DEBUG
 	void printMat(char* name){
 		std::cout << name << std::endl;
 		printf("%8.3lf", matrix[0]); printf("%8.3lf", matrix[1]); printf("%8.3lf", matrix[2]); printf("%8.3lf", matrix[3]); std::cout << std::endl;
@@ -47,5 +50,22 @@ public:
 		printf("%8.3lf", matrix[8]); printf("%8.3lf", matrix[9]); printf("%8.3lf", matrix[10]); printf("%8.3lf", matrix[11]); std::cout << std::endl;
 		printf("%8.3lf", matrix[12]); printf("%8.3lf", matrix[13]); printf("%8.3lf", matrix[14]); printf("%8.3lf", matrix[15]); std::cout << std::endl << std::endl;
 	}
+#endif // DEBUG
+
+};
+
+class modelMat : public matrix4{
+public:
+
+	modelMat();
+	~modelMat();
+
+	//Translate a moodel matrix BY translation vector
+	void translateModel(const vector3 translate);
+	//Translate a model matrix to an absolute position
+	void translateModelTo(const vector3 translate);
+
+	void scale(float scaleBy);
+
 };
 
