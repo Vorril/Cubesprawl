@@ -83,42 +83,48 @@ namespace GL_Loader{
 
 		/////////// Texture //////////////////////////////////////////////////////
 		glGenTextures(1, &texture);
+		//glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-
+		glEnable(GL_TEXTURE_2D_ARRAY);
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size());
-		
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_GENERATE_MIPMAP, GL_TRUE);//Pre 3.1
+		//glTexImage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);//nothing
 
 		for (int i = 0; i < files.size(); i++){
-			vector<unsigned char*> buffers;
+			unsigned char* buffer;
 
 			int w, h, c;
 		
 			string fileLoc = files[i];
 			fileLoc.append(".bmp");
 
-			buffers.push_back(SOIL_load_image(fileLoc.c_str(), &w, &h, &c, SOIL_LOAD_AUTO));
-				//if w h c are wrong.... could check for this
-				if (buffers.back() == nullptr){// || wid != w || hi != h
-					cout << "MISSING TEXTURE: " << fileLoc << endl;//TEMP
+			buffer = (SOIL_load_image(fileLoc.c_str(), &w, &h, &c, SOIL_LOAD_AUTO));
+			if (buffer == nullptr){// || wid != w || hi != h
+				cout << "MISSING TEXTURE: " << fileLoc << endl;//TEMP
 					return;
-				}
+			}
+		
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 			
-
-			//glTexImage3D(GL_TEXTURE_2D_ARRAY, t, GL_RGB8, dim,dim, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, buffers[t]);
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGB, GL_UNSIGNED_BYTE, buffers[0]);
-			free(buffers[0]);
 			
-
-			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+			free(buffer);
 		}
+		//glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+			
 
 		/////// Normal Map ////////////////////////////////////////////////////////////////////////////
 		glGenTextures(1, &normMaps);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, normMaps);
 
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size());
+		//glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1       , GL_RGB8, wid, hi, files.size());
 
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

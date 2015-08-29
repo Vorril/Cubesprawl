@@ -33,7 +33,7 @@ Shader flatCol;
 Shader pvFlatCol;
 Shader pvTexture;
 Shader pvArrTexture;
-Shader pvArrNormMap;
+Shader pvArrNormMap; float ratio = 0.5f;
 //Shader pvColorFBO;
 Shader pvLitTex;
 Shader pvLitTexVary;
@@ -129,8 +129,11 @@ void display(){
 	bound ? worldCam.moveCamera(speedMod) : worldCam.moveCameraUnbound(speedMod);
 	worldCam.update();
 
-	//UI->mouseOver(window.mousePosGLcoords());
-	//UI->draw();
+	
+	if (paused) {
+		UI->mouseOver(window.mousePosGLcoords());
+		UI->draw();
+	}
 	////////////////\
 	////////////////\\
 	////////////////\\\
@@ -260,8 +263,10 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 			toggle(shaderUsing);
 			break;
 		case 53:// 5
+			world.texArray = normMapArray;
 			break;
 		case 54:// 6
+			world.texArray = texArray;
 			break;
 		case 55:// 7
 			break;
@@ -488,13 +493,13 @@ void window_size_callback(GLFWwindow* windowP, int widthNew, int heightNew){
 
 
 void tempCB_Top(){
-	glUseProgram(pvLitTexVary.theProgram);
-	glUniform1f(pvLitTexVary.uniform1, lambert);
+	glUseProgram(pvArrNormMap.theProgram);
+	glUniform1f(pvArrNormMap.uniform1, ratio);
 	glUseProgram(0);
 }
 void tempCB_Bot(){
-	glUseProgram(pvLitTexVary.theProgram);
-	glUniform1f(pvLitTexVary.uniform2, diffuse);
+	glUseProgram(pvArrNormMap.theProgram);
+	glUniform1f(pvArrNormMap.uniform1, ratio);
 	glUseProgram(0);
 }
 
@@ -519,6 +524,8 @@ void initialize(){
 	pvArrTexture.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
 	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
 	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
+	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::TRILIN,10);
+	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::TRILIN,10);
 	pvLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
 	pvmLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
 	pvLitTexVary.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
@@ -540,6 +547,12 @@ void initialize(){
 	glUniform1f(pvLitTexVary.uniform1, lambert);
 	glUniform1f(pvLitTexVary.uniform2, diffuse);
 	glUseProgram(0);
+
+	pvArrNormMap.setUniform("ratio", 1);
+	glUseProgram(pvArrNormMap);
+	glUniform1f(pvArrNormMap.uniform1, ratio);
+	glUseProgram(0);
+
 
 	pvmLitTex.setUniform("pvm", 1);
 
@@ -578,15 +591,15 @@ void initialize(){
 
 	///////////////////////////////////////
 	////World////////////////////
-	
-	vector<string> files;
+	//
+	//vector<string> files;
 	//files.push_back("Textures/HomeCube/home");
 	////files.push_back("Textures/RedCube/red");
-	//files.push_back("Textures/red2");
+	//files.push_back("Textures/RedCube/red");
 	////files.push_back("Textures/uv_test");
 	//files.push_back("Textures/BlueCube/blue");
 
-	//GL_Loader::loadArrayTexture(texArray, 64, 64, 4, files,true);
+	//GL_Loader::loadArrayTexture(texArray, 64, 64, 4, files,false);
 
 	vector<string> mappedFiles;
 	mappedFiles.push_back("Textures/Mapped/paper");
@@ -610,8 +623,8 @@ void initialize(){
 	///////////////////////////////
 	UI = new UIframe();
 
-	UI->addSlider(window.arbPosGLcoords(window.width - 180, 40), window.dimensionGLcoords(120, 35), &lambert, 0.0f, 1.0f, tempCB_Top);
-	UI->addSlider(window.arbPosGLcoords(window.width - 180, 110), window.dimensionGLcoords(120, 35), &diffuse, 0.0f, 1.0f, tempCB_Bot);
+	UI->addSlider(window.arbPosGLcoords(window.width - 180, 40), window.dimensionGLcoords(120, 35), &ratio, 0.0f, 1.0f, tempCB_Top);
+	//UI->addSlider(window.arbPosGLcoords(window.width - 180, 110), window.dimensionGLcoords(120, 35), &diffuse, 0.0f, 1.0f, tempCB_Bot);
 
 	times.updateTime();
 
