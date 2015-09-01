@@ -4,6 +4,7 @@
 class vector3
 {
 public:
+
 	static const vector3 UNIT_X;
 	static const vector3 UNIT_Y;
 	static const vector3 UNIT_Z;
@@ -44,3 +45,4 @@ public:
 	float & operator[](int i){ return coords[i]; }
 };
 
+typedef vector3 vec3;

@@ -14,12 +14,19 @@ private:
 	//bool needsUpdated;considering
 
 public: //really need to move these to private, /use get methods// actually try to pass the camera when possible
-	//matrix4 PVmatrix; 
+	
 	matrix4 PV_Matrix;
 	vector3 lookDirection;
 	vector3 perpToLookDir;
 	vector3 perpPerpDir;
 	vector3 cameraPosition;//worldspace
+	//0 = p // 1 = v //2 = pv
+	void getConstMatPointers(vector<const matrix4*> &mats ){
+		mats[0] = &projectionMatrix;
+		mats[1] = &viewMatrix;
+		mats[2] = &PV_Matrix;
+	}
+
 
 	unsigned int keyDownCode = 0;
 	

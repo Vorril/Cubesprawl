@@ -3,10 +3,11 @@
 #include <vector3.h>
 
 
-
 class matrix3
 {
 public:
+typedef matrix3 mat3;
+
 	matrix3();
 	//~matrix3();
 

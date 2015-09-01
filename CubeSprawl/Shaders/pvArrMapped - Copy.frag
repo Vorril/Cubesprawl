@@ -14,6 +14,6 @@ void main()
     vec3 textureNormal_tangentSpace = normalize(texture2DArray(normalSampler, vec3(UV, layer)).rgb*2.0 - 1.0);
     float incidence = clamp( dot(lightDir_tangentSpace.rgb, textureNormal_tangentSpace), 0.0, 1.0);
     
-     vec3 diffColor = texture2DArray(arrSampler, vec3(UV, layer)).rgb;
+    vec3 diffColor = texture2DArray(arrSampler, vec3(UV, layer)).rgb;
     fragColor = diffColor*( ratio*(incidence * lightDir_tangentSpace.a) + (1.0 - ratio));
 }

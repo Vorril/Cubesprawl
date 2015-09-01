@@ -12,6 +12,7 @@
 class matrix4
 {
 public:
+typedef matrix4 mat4;
 
 	float matrix[16];
 
@@ -26,14 +27,21 @@ public:
 	static matrix4 makeRotateYaxis(float theta);
 	//Takes degrees
 	static matrix4 makeRotateZaxis(float theta);
+	//Takes degrees//does this rotate clockwise around normal or something??
+	static matrix4 makeRotate_arb_XYZ(vector3 axisNormal, float theta);
+	//Takes degrees
+	static matrix4 makeRotate_arb_XZ(vector3 axisNormal, float theta);
+
 
 	static vector4 rotateByArb_XYZ(vector4 pointToRot, vector4 axisNormal, float theta);
+	//static void rotateByArb_XYZ(vector4& toRotate, vector4 axisNormal, float theta);
 	static vector4 rotateByArb_XZ(vector4 pointToRot, vector4 axisNormal, float theta);
 
 	matrix4  transpose()const;
 
-	matrix4 operator*(const matrix4& dot)const;
-	vector4 operator*(const vector4& dot);
+	matrix4 operator*(const matrix4& const dot)const;
+	vector4 operator*(const vector4& dot)const;
+	void operator*=(const matrix4& dot);
 	vector4 rotMult(vector4 const dot)const;
 
 	float operator[](int i) const{ return matrix[i]; }
@@ -67,5 +75,6 @@ public:
 
 	void scale(float scaleBy);
 
+	void copyMat4(mat4 copy);
 };
 

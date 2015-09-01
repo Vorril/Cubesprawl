@@ -33,7 +33,7 @@ Shader flatCol;
 Shader pvFlatCol;
 Shader pvTexture;
 Shader pvArrTexture;
-Shader pvArrNormMap; float ratio = 0.5f;
+Shader pvArrNormMap; float ratio = 0.165f;
 //Shader pvColorFBO;
 Shader pvLitTex;
 Shader pvLitTexVary;
@@ -50,8 +50,9 @@ UIframe* UI;
 
 WorldObject tower;
 WorldObject coordMarker;
+WorldObject arrow;
 
-GLuint texArray;
+GLuint texArray; GLuint texArrayManual;
 GLuint normMapArray;
 
 bool bound = false;
@@ -71,6 +72,8 @@ vector4 light;
 vec4VBO crosshair;
 vec4VBO chunkDims;
 UITextBox* textBox;
+
+
 
 class windowData{ //Data for a window, width, height,  and mouse coords 
 public:
@@ -159,15 +162,29 @@ void display(){
 	/////////////////////
 
 	if (TAB_DOWN){
-		const vector3 coordMarkerLoc = worldCam.cameraPosition + (worldCam.lookDirection * -0.16f) + (worldCam.perpToLookDir * -0.107f) + (worldCam.perpPerpDir * 0.05f);
-		modelMat model;
-		model.translateModelTo(coordMarkerLoc);
-		model.scale( 0.02f );
-		coordMarker.m_Matrix = model;
-
-		//WorldObject::cameraPV = worldCam.PV_Matrix;
-
+		vector3 coordMarkerLoc = worldCam.cameraPosition + (worldCam.lookDirection * -0.16f) +(worldCam.perpToLookDir * -0.117f) + (worldCam.perpPerpDir * 0.05f);
+		
+		//Coord marker ///
+		modelMat coordmodel;
+		coordmodel.translateModelTo(coordMarkerLoc);
+		coordmodel.scale(0.02f);
+		coordMarker.m_Matrix = coordmodel;
 		coordMarker.drawLitPVM();
+		//////////////////
+
+		float azimuthal = acosf(light[1]);//y up//returns radians
+		azimuthal *= degreesPerRadian;
+
+		vector3 arbAxisRot = vector3(light) % vector3(0.0f, 1.0f, 0.0f); // Will be in the XZ plane
+		arbAxisRot.normalize();
+		arbAxisRot[1] *= -1;
+		//matrix4 rotMatrix = 
+		arrow.rotMat = matrix4::makeRotate_arb_XYZ(arbAxisRot, azimuthal);// matrix4::makeRotateXaxis(azimuthal);
+		arrow.worldTranslation = (coordMarkerLoc + (worldCam.perpToLookDir * 0.04f) + (worldCam.perpPerpDir * 0.01f));
+		arrow.scale=(0.02f);
+
+		arrow.assemble_M();
+		arrow.drawLitPVM();
 	
 	}
 	
@@ -263,7 +280,7 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 			toggle(shaderUsing);
 			break;
 		case 53:// 5
-			world.texArray = normMapArray;
+			world.texArray = texArrayManual;
 			break;
 		case 54:// 6
 			world.texArray = texArray;
@@ -433,15 +450,20 @@ void checkMouse(){
 		}
 
 			else{//TEMP
-				vector3 light3 = (vector3)light;
 				double deltaX = window.width * 0.50 - window.mouseX;
 				double deltaY = window.height * 0.50 - window.mouseY;
 				glfwSetCursorPos(window.primaryWindow, window.width * 0.50, window.height * 0.50);
 				float horzAngle = float(deltaX) * window.degreesPerPixelHorz;
 				float vertAngle = float(deltaY) * window.degreesPerPixelVert;
 
+				vector3 light3 = (vector3)light;
 				light3 = matrix3::makeRotateYaxis(-horzAngle)*light3;
-				light3 = matrix3::makeRotateZaxis(vertAngle)*light3;
+				vector3 lightXZ = vector3(light3[0], 0.0f, light3[2]);
+				lightXZ.normalize();
+				vector3 lightXZ_perp = vector3(lightXZ[2], 0.f, -lightXZ[0]);
+
+				light3 = matrix3::rotateByArb_XZ(light3, lightXZ_perp, -vertAngle);
+				
 				light3.normalize();
 
 				light = vector4(light3, light[3]);
@@ -522,10 +544,10 @@ void initialize(){
 	//pvColorFBO.InitializeProgram("Shaders/pvColorFBO.vert", "Shaders/pvColorFBO.frag");
 
 	pvArrTexture.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
-	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
-	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
-	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::TRILIN,10);
-	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::TRILIN,10);
+	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+//	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::TRILIN,10);
+	//pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::TRILIN,10);
 	pvLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
 	pvmLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
 	pvLitTexVary.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
@@ -607,6 +629,13 @@ void initialize(){
 	mappedFiles.push_back("Textures/Mapped/rock");
 	GL_Loader::loadArrayTextureNormalMapped(texArray, normMapArray, 512, 512, mappedFiles);
 
+
+	//vector<string> manual;
+	//manual.push_back("Textures/Mapped/Mips/paper");
+	//manual.push_back("Textures/Mapped/Mips/grass");
+	//manual.push_back("Textures/Mapped/Mips/rock");
+	//GL_Loader::loadArrayTexture(texArrayManual, 512, 512, 5, manual);
+
 	////////////////////////////////////////////////////////////////
 	world.shader = &pvArrTexture;
 	world.texArray = texArray;
@@ -660,12 +689,36 @@ void initialize(){
 	coordMarker.loadMesh("Assets/coordMarker.mesh");
 	coordMarker.loadTexture("Textures/coordMarker.bmp");
 
+	arrow.loadMesh("Assets/arrow.mesh");
+	glGenTextures(1, &arrow.texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, arrow.texture);
+	glTexStorage2D(GL_TEXTURE_2D, 10, GL_RGB8, 1024, 1024);//method 1 (line 1/2) works
+//	GLenum myerr = glGetError();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+	int w, h, c;
+	unsigned char* arrowBuff = SOIL_load_image("Textures/Arrow.bmp", &w, &h, &c, SOIL_LOAD_AUTO);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1024, GL_RGB, GL_UNSIGNED_BYTE, arrowBuff);//method 1 (line 2/2) works
+//	myerr = glGetError();
+	//glTexImage2D(GL_TEXTURE_2D,0,GL_RGB8,1024,1024,0,GL_RGB, GL_UNSIGNED_BYTE,arrowBuff);//method 2 works
+	glGenerateMipmap(GL_TEXTURE_2D);
+	free(arrowBuff);
+
+
 	///WorldObject init// TODO make this right///////////
 	WorldObject::diffuseTexShader = &pvTexture;
 	WorldObject::litTexShader = &pvLitTex;
 	WorldObject::litTexPVMShader = &pvmLitTex;
 
-	WorldObject::cameraPV = &worldCam.PV_Matrix;
+	vector<const matrix4*> mats;
+	mats.resize(3);
+	worldCam.getConstMatPointers(mats);
+
+	WorldObject::cameraPV = mats[2];
 	/////////////////////////////////////////////////////
 
 

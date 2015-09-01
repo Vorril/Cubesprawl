@@ -14,13 +14,15 @@ namespace GL_Loader{
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
 
+		if (automip) mips = 1;
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mips, GL_RGB8, wid, hi, files.size());
 
 
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		if (automip) mips = 1;
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
 
 		for (int i = 0; i < files.size(); i++){
 			vector<unsigned char*> buffers;
@@ -68,14 +70,15 @@ namespace GL_Loader{
 	//Push "Textures/tex1" into files
 	static void loadArrayTextureNormalMapped(GLuint& texture, GLuint& normMaps, int wid, int hi, vector<string>& files, int maxNumMips = 1024 ){
 		int mipLevel = 1;
-		int dimCopy = (wid < hi ? wid : hi);
+		int dimCopy = wid < hi ? wid : hi;
 
-		while (dimCopy > 1){
+		while (dimCopy > 2){
 			mipLevel += 1;
 			dimCopy /= 2;
 		}//strictly speaking the 1 pixel mip is a thing I think, this wont make it
 
-		mipLevel = (maxNumMips < mipLevel ? maxNumMips : mipLevel);//take the smaller value
+		mipLevel = (maxNumMips < mipLevel) ? maxNumMips : mipLevel;//take the smaller value
+		//if (maxNumMips < mipLevel) mipLevel = maxNumMips;
 
 		////////////////////////////////
 		// Generation ////////////////
@@ -83,12 +86,10 @@ namespace GL_Loader{
 
 		/////////// Texture //////////////////////////////////////////////////////
 		glGenTextures(1, &texture);
-		//glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-		glEnable(GL_TEXTURE_2D_ARRAY);
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size());
-		//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_GENERATE_MIPMAP, GL_TRUE);//Pre 3.1
-		//glTexImage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);//nothing
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGBA8, wid, hi, files.size());//method 1 (1/2) no mips
+		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 9, GL_RGB8, wid, hi, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);//nothing
 
 		for (int i = 0; i < files.size(); i++){
 			unsigned char* buffer;
@@ -96,24 +97,24 @@ namespace GL_Loader{
 			int w, h, c;
 		
 			string fileLoc = files[i];
-			fileLoc.append(".bmp");
+			fileLoc.append(".png");
 
-			buffer = (SOIL_load_image(fileLoc.c_str(), &w, &h, &c, SOIL_LOAD_AUTO));
+			buffer = (SOIL_load_image(fileLoc.c_str(), &w, &h, &c, SOIL_LOAD_RGBA));
 			if (buffer == nullptr){// || wid != w || hi != h
 				cout << "MISSING TEXTURE: " << fileLoc << endl;//TEMP
 					return;
 			}
 		
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-			
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer);//method 1 (2/2) no mips
+			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, wid, hi, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 			
 			free(buffer);
 		}
-		//glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+		glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
 		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
@@ -121,10 +122,10 @@ namespace GL_Loader{
 
 		/////// Normal Map ////////////////////////////////////////////////////////////////////////////
 		glGenTextures(1, &normMaps);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, normMaps);
 
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size());
-		//glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1       , GL_RGB8, wid, hi, files.size());
 
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -150,9 +151,9 @@ namespace GL_Loader{
 			free(buffers[0]);
 
 
-			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+			
 		}
-
+		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 		
 	}
 

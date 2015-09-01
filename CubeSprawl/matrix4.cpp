@@ -69,6 +69,26 @@ vector4 matrix4::rotateByArb_XYZ(vector4 pointToRot, vector4 axisNormal, float t
 	return rotMat.rotMult(pointToRot);//should this be full mult?
 }
 
+matrix4 matrix4::makeRotate_arb_XYZ(vec3 axisNormal, float theta){
+												// 0  1  2  3	
+	float cosine = cosf(theta*radiansPerDegree);// 4  5  6  7	
+	float sine = sinf(theta*radiansPerDegree);  // 8  9  10 11	
+	matrix4 rotMat;								// 12 13 14 15
+	rotMat[0] = cosine + ux*ux*(1 - cosine);
+	rotMat[1] = ux*uy*(1 - cosine) - uz*sine;
+	rotMat[2] = ux*uz*(1 - cosine) + uy*sine;
+
+	rotMat[4] = uy*ux*(1 - cosine) + uz*sine;
+	rotMat[5] = cosine + uy*uy*(1 - cosine);
+	rotMat[6] = uy*uz*(1 - cosine) - ux*sine;
+
+	rotMat[8] = uz*ux*(1 - cosine) - uy*sine;
+	rotMat[9] = uz*uy*(1 - cosine) + ux*sine;
+	rotMat[10] = cosine + uz*uz*(1 - cosine);
+
+	return rotMat;
+}
+
 //2 trig, 
 vector4 matrix4::rotateByArb_XZ(vector4 pointToRot, vector4 axisNormal, float theta){
 	// for htis all uy = 0
@@ -89,13 +109,32 @@ vector4 matrix4::rotateByArb_XZ(vector4 pointToRot, vector4 axisNormal, float th
 
 	return rotMat*(pointToRot);//using rotMult here cause jerkiness!!
 }
+matrix4 matrix4::makeRotate_arb_XZ(vector3 axisNormal, float theta){
+float cosine = cosf(theta*radiansPerDegree);
+	float sine = sinf(theta*radiansPerDegree);
+	matrix4 rotMat;								
+	rotMat[0] = cosine + ux*ux*(1 - cosine);
+	rotMat[1] =  - uz*sine;
+	rotMat[2] = ux*uz*(1 - cosine);
+
+	rotMat[4] = uz*sine;
+	rotMat[5] = cosine;
+	rotMat[6] = - ux*sine;
+
+	rotMat[8] = uz*ux*(1 - cosine);
+	rotMat[9] = ux*sine;
+	rotMat[10] = cosine + uz*uz*(1 - cosine);
+
+	return rotMat;
+}
+
 #undef ux
 #undef uy
 #undef uz
 
 //useful to make VP or MVP matrixes to pass
 //ROW MAJOR
-matrix4 matrix4::operator*(const matrix4& dot)const{
+matrix4 matrix4::operator*(const matrix4& const dot)const{
 	matrix4 multi;            //dot
 						// |a  b  c  d| 
 						// |e  f  g  h| 
@@ -127,9 +166,12 @@ matrix4 matrix4::operator*(const matrix4& dot)const{
 
 	return multi;
 }
+void matrix4::operator*=(const matrix4& const dot){
+	*this = (*this) *dot;
+}
 
 //28 flops, 4 assignments
-vector4 matrix4::operator*(const vector4& dot){				
+vector4 matrix4::operator*(const vector4& dot)const{				
 	vector4 newVector;											
 	newVector.coords[0] = this->matrix[0] * dot.coords[0] +    
 							this->matrix[1] * dot.coords[1] +   
@@ -186,7 +228,7 @@ matrix4 matrix4::transpose()const{
 	//	  | 4  5  6  7 |		| 1  5  9   13 |
 	//	  | 8  9 10 11 |		| 2  6  10  14 |
 	//	  |12 13 14 15 |		| 3  7  11  15 |
-
+	//This class is RM openGL is CM...
 	matrix4 transposed;
 	transposed[0] = matrix[0];
 	transposed[5] = matrix[5];
@@ -256,12 +298,26 @@ void modelMat::translateModel(const vector3 translate){
 
 //Translate a model matrix to an absolute position
 void modelMat::translateModelTo(const vector3 translate){
-	matrix[3] = translate[0];
-	matrix[7] = translate[1];
-	matrix[11] = translate[2];
+	mat4 transMat;
+	transMat.matrix[3] = translate[0];
+	transMat.matrix[7] = translate[1];
+	transMat.matrix[11] = translate[2];
+
+	(*this) *= transMat;
 
 }
 
 void modelMat::scale(float scaleBy){
-	matrix[0] = matrix[5] = matrix[10] = scaleBy;
+	mat4 scaleMat;
+	scaleMat.matrix[0] = scaleBy;
+	scaleMat.matrix[5] = scaleBy;
+	scaleMat.matrix[10] = scaleBy;
+
+	(*this) *= scaleMat;
+}
+
+void modelMat::copyMat4(mat4 copy){
+	for (int i = 0; i < 16; i++){
+		this->matrix[i] = copy[i];
+	}
 }

@@ -1,7 +1,9 @@
 #pragma once
+
 class vector2
 {
 public:
+typedef vector2 vec2;
 	vector2();
 	vector2(float u, float v);
 	//~vector2();

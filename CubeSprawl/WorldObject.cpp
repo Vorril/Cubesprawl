@@ -5,6 +5,8 @@ Shader* WorldObject::litTexShader = nullptr;
 Shader* WorldObject::litTexPVMShader = nullptr;
 
 matrix4 const* WorldObject::cameraPV = nullptr;
+/*matrix4 const* WorldObject::cameraV = nullptr;
+matrix4 const* WorldObject::cameraP = nullptr;*/
 
 
 WorldObject::WorldObject()
@@ -28,6 +30,13 @@ void WorldObject::loadMesh(const char* File){
 
 void WorldObject::loadTexture(const char* File, bool flagMips, bool compress){
 	GL_Loader::loadTexture(texture, flagMips, compress, File);
+}
+
+void WorldObject::assemble_M(){
+	m_Matrix = modelMat();//re identity
+	m_Matrix.translateModelTo(worldTranslation);
+	m_Matrix *= rotMat;
+	m_Matrix.scale(scale);
 }
 
 //TODO write versions of these that dont unbind program
@@ -75,7 +84,8 @@ void WorldObject::drawLit()const{
 }
 
 void WorldObject::drawLitPVM()const{
-	const matrix4 pvm = *cameraPV * m_Matrix;
+//	const matrix4 pvm = (*cameraP) * (*cameraV) * m_Matrix;
+	const matrix4 pvm = (*cameraPV) * m_Matrix;//same
 
 	glUseProgram(*litTexPVMShader);
 	glUniformMatrix4fv(litTexPVMShader->uniform1, 1, false, &((pvm.transpose()).matrix[0]));

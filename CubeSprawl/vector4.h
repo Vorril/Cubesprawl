@@ -50,3 +50,4 @@ public:
 
 };
 
+typedef vector4 vec4;

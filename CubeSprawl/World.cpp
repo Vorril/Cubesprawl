@@ -289,6 +289,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (forw->exposedSides == 16){
 			getChunkWorld(x + 1, z)->reveal(forw);
 		}
+		else getChunkWorld(x + 1, z)->needsBuffered = true;
 	}//forw
 
 	if (Cube* back = occupied(x - 1, y, z)){//16 back
@@ -296,6 +297,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (back->exposedSides == 32){
 			getChunkWorld(x - 1, z)->reveal(back);
 		}
+		else getChunkWorld(x - 1, z)->needsBuffered = true;
 	}//back
 
 	if (Cube* right = occupied(x, y, z + 1)){// 8 right
@@ -303,6 +305,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (right->exposedSides == 4){
 			getChunkWorld(x, z + 1)->reveal(right);
 		}
+		else getChunkWorld(x, z + 1)->needsBuffered = true;
 	}//right
 
 	if (Cube* left = occupied(x, y, z - 1)){// 4 left
@@ -310,6 +313,7 @@ void World::evaluateNeighborsRevealed(int x, int y, int z){
 		if (left->exposedSides == 8){
 			getChunkWorld(x, z - 1)->reveal(left);
 		}
+		else getChunkWorld(x, z - 1)->needsBuffered = true;
 	}//left
 }
 
@@ -739,12 +743,13 @@ void World::drawNormMapped()const{
 	glEnableVertexAttribArray(4); // bittangent
 	glEnableVertexAttribArray(5); // norm
 
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray);
-	glBindSampler(0, shader->samplers[0]);
+	glBindSampler(0, normmapshader->samplers[0]);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray_NormMaps);
-	glBindSampler(1, shader->samplers[1]);
+	glBindSampler(1, normmapshader->samplers[1]);
 
 
 	for each (Chunk* chunkPtr in worldChunks){
