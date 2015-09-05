@@ -33,7 +33,7 @@ Shader flatCol;
 Shader pvFlatCol;
 Shader pvTexture;
 Shader pvArrTexture;
-Shader pvArrNormMap; float ratio = 0.165f;
+Shader pvArrNormMap; float ratio = 0.365f;
 //Shader pvColorFBO;
 Shader pvLitTex;
 Shader pvLitTexVary;
@@ -52,8 +52,8 @@ WorldObject tower;
 WorldObject coordMarker;
 WorldObject arrow;
 
-GLuint texArray; GLuint texArrayManual;
-GLuint normMapArray;
+GLuint texArray; 
+GLuint normMapArray; 
 
 bool bound = false;
 bool paused = false;
@@ -150,12 +150,12 @@ void display(){
 	glBindBuffer(GL_ARRAY_BUFFER, crosshair.VERT_BUFF_ID);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glDrawArrays(GL_LINES, 0, 4);
+	glUseProgram(0);
 	//////////////////////////////////////////////////////////////////////////////
-
 	
 
+	textBox->draw();
 
-	glUseProgram(0);
 
 
 	tower.drawLit();
@@ -277,13 +277,11 @@ void key_callback(GLFWwindow* windowP, int key, int scancode, int action, int mo
 			toggle(lightControl);
 			break;
 		case 52:// 4
-			toggle(shaderUsing);
+			//toggle(shaderUsing);
 			break;
 		case 53:// 5
-			world.texArray = texArrayManual;
 			break;
 		case 54:// 6
-			world.texArray = texArray;
 			break;
 		case 55:// 7
 			break;
@@ -533,51 +531,59 @@ void tempCB_Bot(){
 void initialize(){
 	/////////////////////////////////////////////////////////
 	///////// Create Shaders ////////////////////////////////
-	pvLitTex.InitializeProgram("Shaders/pvLitTex.vert", "Shaders/pvLitTex.frag");
-	pvmLitTex.InitializeProgram("Shaders/pvmLitTex.vert", "Shaders/pvmLitTex.frag");
-	pvLitTexVary.InitializeProgram("Shaders/pvLitTexVary.vert", "Shaders/pvLitTexVary.frag");
-	pvTexture.InitializeProgram("Shaders/pvTexture.vert", "Shaders/pvTexture.frag"); 
-	flatCol.InitializeProgram("Shaders/flatColor.vert", "Shaders/flatColor.frag");
-	pvFlatCol.InitializeProgram("Shaders/pvFlatColor.vert", "Shaders/pvFlatColor.frag");
-	pvArrTexture.InitializeProgram("Shaders/pvArrTexture.vert", "Shaders/pvArrTexture.frag");
-	pvArrNormMap.InitializeProgram("Shaders/pvArrMapped.vert", "Shaders/pvArrMapped.frag");
-	//pvColorFBO.InitializeProgram("Shaders/pvColorFBO.vert", "Shaders/pvColorFBO.frag");
+	//Create Shader Programs
+	{
+		pvLitTex.InitializeProgram("Shaders/pvLitTex.vert", "Shaders/pvLitTex.frag");
+		pvmLitTex.InitializeProgram("Shaders/pvmLitTex.vert", "Shaders/pvmLitTex.frag");
+		pvLitTexVary.InitializeProgram("Shaders/pvLitTexVary.vert", "Shaders/pvLitTexVary.frag");
+		pvTexture.InitializeProgram("Shaders/pvTexture.vert", "Shaders/pvTexture.frag");
+		flatCol.InitializeProgram("Shaders/flatColor.vert", "Shaders/flatColor.frag");
+		pvFlatCol.InitializeProgram("Shaders/pvFlatColor.vert", "Shaders/pvFlatColor.frag");
+		pvArrTexture.InitializeProgram("Shaders/pvArrTexture.vert", "Shaders/pvArrTexture.frag");
+		pvArrNormMap.InitializeProgram("Shaders/pvArrMapped.vert", "Shaders/pvArrMapped.frag");
+		//pvColorFBO.InitializeProgram("Shaders/pvColorFBO.vert", "Shaders/pvColorFBO.frag");
+	}
 
-	pvArrTexture.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
-	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-	pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-//	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::TRILIN,10);
-	//pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::TRILIN,10);
-	pvLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-	pvmLitTex.setSampler("diffuseSampler",0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-	pvLitTexVary.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-	pvTexture.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
-
-
-	flatCol.setUniform("color", 1);
-	glUseProgram(flatCol.theProgram);
-	glUniform3f(flatCol.uniform1, 0.1f, 0.8f, 0.2f);
-	glUseProgram(0);
-	pvFlatCol.setUniform("color", 1);
-	glUseProgram(pvFlatCol.theProgram);
-	glUniform3f(pvFlatCol.uniform1, 0.1f, 0.8f, 0.2f);
-	glUseProgram(0);
-
-	pvLitTexVary.setUniform("lambert", 1);
-	pvLitTexVary.setUniform("diffuse", 2);
-	glUseProgram(pvLitTexVary.theProgram);
-	glUniform1f(pvLitTexVary.uniform1, lambert);
-	glUniform1f(pvLitTexVary.uniform2, diffuse);
-	glUseProgram(0);
-
-	pvArrNormMap.setUniform("ratio", 1);
-	glUseProgram(pvArrNormMap);
-	glUniform1f(pvArrNormMap.uniform1, ratio);
-	glUseProgram(0);
+	//Set Samplers and Uniforms as Neccassary
+	{
+		pvArrTexture.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 16);
+		pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+		pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+		//	pvArrNormMap.setSampler("arrSampler", 0, Shader::SAMPLER_SETTING::TRILIN,10);
+		//pvArrNormMap.setSampler("normalSampler", 1, Shader::SAMPLER_SETTING::TRILIN,10);
+		pvLitTex.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+		pvmLitTex.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+		pvLitTexVary.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
+		pvTexture.setSampler("diffuseSampler", 0, Shader::SAMPLER_SETTING::ANISTROPIC, 8);
 
 
-	pvmLitTex.setUniform("pvm", 1);
+		flatCol.setUniform("color", 1);
+		glUseProgram(flatCol.theProgram);
+		glUniform3f(flatCol.uniform1, 0.1f, 0.8f, 0.2f);
+		glUseProgram(0);
+		pvFlatCol.setUniform("color", 1);
+		glUseProgram(pvFlatCol.theProgram);
+		glUniform3f(pvFlatCol.uniform1, 0.1f, 0.8f, 0.2f);
+		glUseProgram(0);
 
+		pvLitTexVary.setUniform("lambert", 1);
+		pvLitTexVary.setUniform("diffuse", 2);
+		glUseProgram(pvLitTexVary.theProgram);
+		glUniform1f(pvLitTexVary.uniform1, lambert);
+		glUniform1f(pvLitTexVary.uniform2, diffuse);
+		glUseProgram(0);
+
+		pvArrNormMap.setUniform("ratio", 1);
+		glUseProgram(pvArrNormMap);
+		glUniform1f(pvArrNormMap.uniform1, ratio);
+		glUseProgram(0);
+
+
+		pvmLitTex.setUniform("pvm", 1);
+
+	}
+
+	//Link the UBO which knows camera info
 	Shader::setGlobalPV_UBO(&pvLitTex);
 	pvTexture.linkUBO();
 	pvFlatCol.linkUBO();
@@ -587,7 +593,7 @@ void initialize(){
 	pvArrNormMap.linkUBO();
 	////////////////////////////////////////////////////////////////////
 
-	// Light
+	// Light ///
 	vector3 lightProperties(-1.0f, -0.4f, 1.0f);
 	lightProperties.normalize();
 	light = vector4(lightProperties);
@@ -597,6 +603,9 @@ void initialize(){
 	////////////////////////////////////////
 	////Camera///////////////////
 
+//Initial camera setup, basically what is done in a window resize call
+
+	{
 	worldCam = Camera(-0.64f, 0.52f, 0.56f, 5.0f, 9.0f, -2.0f);
 	worldCam.makeProjectionMatrix(window.FoV, (float)window.width / window.height, 0.1f, 2000.0f);
 	worldCam.update();
@@ -610,6 +619,7 @@ void initialize(){
 
 	window.degreesPerPixelHorz *= window.mouseSensitivity;
 	window.degreesPerPixelVert *= window.mouseSensitivity;
+	}
 
 	///////////////////////////////////////
 	////World////////////////////
@@ -629,12 +639,7 @@ void initialize(){
 	mappedFiles.push_back("Textures/Mapped/rock");
 	GL_Loader::loadArrayTextureNormalMapped(texArray, normMapArray, 512, 512, mappedFiles);
 
-
-	//vector<string> manual;
-	//manual.push_back("Textures/Mapped/Mips/paper");
-	//manual.push_back("Textures/Mapped/Mips/grass");
-	//manual.push_back("Textures/Mapped/Mips/rock");
-	//GL_Loader::loadArrayTexture(texArrayManual, 512, 512, 5, manual);
+	
 
 	////////////////////////////////////////////////////////////////
 	world.shader = &pvArrTexture;
@@ -690,23 +695,28 @@ void initialize(){
 	coordMarker.loadTexture("Textures/coordMarker.bmp");
 
 	arrow.loadMesh("Assets/arrow.mesh");
-	glGenTextures(1, &arrow.texture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, arrow.texture);
-	glTexStorage2D(GL_TEXTURE_2D, 10, GL_RGB8, 1024, 1024);//method 1 (line 1/2) works
-//	GLenum myerr = glGetError();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
-	int w, h, c;
-	unsigned char* arrowBuff = SOIL_load_image("Textures/Arrow.bmp", &w, &h, &c, SOIL_LOAD_AUTO);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1024, GL_RGB, GL_UNSIGNED_BYTE, arrowBuff);//method 1 (line 2/2) works
-//	myerr = glGetError();
-	//glTexImage2D(GL_TEXTURE_2D,0,GL_RGB8,1024,1024,0,GL_RGB, GL_UNSIGNED_BYTE,arrowBuff);//method 2 works
-	glGenerateMipmap(GL_TEXTURE_2D);
-	free(arrowBuff);
+	arrow.loadTexture("Textures/Arrow.bmp");
+
+	//glGenTextures(1, &arrow.texture);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, arrow.texture);
+	//glTexStorage2D(GL_TEXTURE_2D, 10, GL_RGB8, 1024, 1024);//method 1 (line 1/2) works
+	//
+	//glGetTexImage
+	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, 1024, 1024);
+	//
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+	//int w, h, c;
+	//unsigned char* arrowBuff = SOIL_load_image("Textures/Arrow.bmp", &w, &h, &c, SOIL_LOAD_AUTO);
+	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 1024, GL_RGB, GL_UNSIGNED_BYTE, arrowBuff);//method 1 (line 2/2) works
+	//
+	////glTexImage2D(GL_TEXTURE_2D,0,GL_RGB8,1024,1024,0,GL_RGB, GL_UNSIGNED_BYTE,arrowBuff);//method 2 works
+	//glGenerateMipmap(GL_TEXTURE_2D);
+	//free(arrowBuff);
 
 
 	///WorldObject init// TODO make this right///////////

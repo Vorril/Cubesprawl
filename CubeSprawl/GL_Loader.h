@@ -68,7 +68,7 @@ namespace GL_Loader{
 	// Textures/tex1.bmp
 	// Textures/tex1NM.bmp
 	//Push "Textures/tex1" into files
-	static void loadArrayTextureNormalMapped(GLuint& texture, GLuint& normMaps, int wid, int hi, vector<string>& files, int maxNumMips = 1024 ){
+	static void loadArrayTextureNormalMapped(GLuint& texture, GLuint& normMaps, int wid, int hi, vector<string>& files, bool GL4_5 = false, int maxNumMips = 1024 ){
 		int mipLevel = 1;
 		int dimCopy = wid < hi ? wid : hi;
 
@@ -86,10 +86,11 @@ namespace GL_Loader{
 
 		/////////// Texture //////////////////////////////////////////////////////
 		glGenTextures(1, &texture);
+		glEnable(GL_TEXTURE_2D_ARRAY);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGBA8, wid, hi, files.size());//method 1 (1/2) no mips
-		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 9, GL_RGB8, wid, hi, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);//nothing
+		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, wid, hi, files.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);//nothing
 
 		for (int i = 0; i < files.size(); i++){
 			unsigned char* buffer;
@@ -106,12 +107,14 @@ namespace GL_Loader{
 			}
 		
 			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer);//method 1 (2/2) no mips
-			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, wid, hi, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+			
 			
 			free(buffer);
 		}
 		glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
-		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+		if(GL4_5)glGenerateTextureMipmapEXT(texture, GL_TEXTURE_2D_ARRAY);
+		else glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+		
 
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -124,37 +127,35 @@ namespace GL_Loader{
 		glGenTextures(1, &normMaps);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, normMaps);
-
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevel, GL_RGB8, wid, hi, files.size());
 
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
 		for (int i = 0; i < files.size(); i++){
-			vector<unsigned char*> buffers;
+			unsigned char* buffer;
 
 			int w, h, c;
 
 			string fileLoc = files[i];
 			fileLoc.append("NM.bmp");
 
-			buffers.push_back(SOIL_load_image(fileLoc.c_str(), &w, &h, &c, SOIL_LOAD_AUTO));
+			buffer = (SOIL_load_image(fileLoc.c_str(), &w, &h, &c, SOIL_LOAD_AUTO));
 			//if w h c are wrong.... could check for this
-			if (buffers.back() == nullptr){// || wid != w || hi != h
+			if (buffer == nullptr){// || wid != w || hi != h
 				cout << "MISSING TEXTURE: " << fileLoc << endl;//TEMP
 				return;
 			}
 
 
-			//glTexImage3D(GL_TEXTURE_2D_ARRAY, t, GL_RGB8, dim,dim, files.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, buffers[t]);
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGB, GL_UNSIGNED_BYTE, buffers[0]);
-			free(buffers[0]);
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, wid, hi, 1, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
-
-			
+			free(buffer);
 		}
-		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-		
+		glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+		if (GL4_5)glGenerateTextureMipmapEXT(normMaps, GL_TEXTURE_2D_ARRAY);
+		else glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
 	static void loadTexture(GLuint &texture, bool flagMips, bool compress, const char* File){
